@@ -40,7 +40,7 @@
     "@babel/runtime": "^7.18.6",
     "aws-sdk": "^2.987.0",
     "babel-loader": "^8.2.3",
-    "electron": "^17.1.2",
+    "electron": "^22.3.25",
     "encoding": "^0.1.13",
     "eslint": "^7.18.0",
     "eslint-config-airbnb": "^18.2.1",
