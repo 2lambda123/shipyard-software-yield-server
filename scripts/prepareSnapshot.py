@@ -53,7 +53,7 @@ def prepare_snapshot(filename: str) -> None:
     # handle potential errors or edge cases
     if df.empty:
         raise ValueError('DataFrame is empty. Please check the input data.')
-    exclude_pools = [
+    include_pools = [
         "0xf4bfe9b4ef01f27920e490cea87fe2642a8da18d",
         "DWmAv5wMun4AHxigbwuJygfmXBBe9WofXAtrMCRJExfb",
         "ripae-seth-weth-42161",
@@ -62,7 +62,7 @@ def prepare_snapshot(filename: str) -> None:
         "0x3c42B0f384D2912661C940d46cfFE1CD10F1c66F-ethereum",
         "0x165ab553871b1a6b3c706e15b6a7bb29a244b2f3",
     ]
-    df = df[~df["pool"].isin(exclude_pools)]
+    df = df[df["pool"].isin(include_pools)]
     df = df[df["project"] != "koyo-finance"]
 
     # cast dtypes and round
