@@ -1,5 +1,6 @@
 import sys
 import ast
+import numpy as np
 
 import pandas as pd
 
@@ -47,11 +48,11 @@ def prepare_snapshot(filename: str) -> None:
     ]
 
     # keep positive apy sum values only
-    df = df[(df["apy"] >= 0) & (df["apy"] <= 1e6)]
-    # tvl btw boundary values
-    df = df[(df["tvlUsd"] >= 1000) & (df["tvlUsd"] <= 2e10)]
+    df = df[(df["apy"] >= 0) & (df["apy"] <= 1e6) & (df["tvlUsd"] >= 1000) & (df["tvlUsd"] <= 2e10)]
 
-    # remove pools and project from exclusion list
+    # handle potential errors or edge cases
+    if df.empty:
+        raise ValueError('DataFrame is empty. Please check the input data.')
     exclude_pools = [
         "0xf4bfe9b4ef01f27920e490cea87fe2642a8da18d",
         "DWmAv5wMun4AHxigbwuJygfmXBBe9WofXAtrMCRJExfb",
@@ -73,7 +74,7 @@ def prepare_snapshot(filename: str) -> None:
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df = df.sort_values(["pool", "timestamp"], ascending=True).reset_index(drop=True)
     f = "yield_snapshot"
-    df.to_csv(f"{f}_hourly.csv", index=False)
+    df.to_csv(f"{f}_hourly.csv", index=False, float_format='%.5f')
 
     # 2. prepare daily (for stat)
     df_daily = (
@@ -81,7 +82,7 @@ def prepare_snapshot(filename: str) -> None:
         .last()
         .reset_index()
     )
-    df_daily.to_json(f"{f}_daily.json", orient="records")
+    df_daily.to_json(f"{f}_daily.json", orient="records", double_precision=5)
 
     # 3. prepare last (for config)
     df_last = (
