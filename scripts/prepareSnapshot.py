@@ -19,9 +19,31 @@ import pandas as pd
 # based on output from Step 2) run the bootstrapUUID.js file which creates a unique uuid for each unique pool and stores that locally
 
 # Step 4) CREATE THE POSTGRES TABLES
-# run the create scripts starting with config, then the others (order doesn't matter for the rest)
-
 def replaceFunc(x: str) -> str:
+    if x == "[null]":
+        return "[]"
+    elif x == "[null,null]":
+        return "[]"
+    elif "null," in x:
+        return x.replace("null,", "")
+    elif ",null" in x:
+        return x.replace(",null", "")
+    else:
+        return x
+
+ 
+    if x == "[null]":
+        return "[]"
+    elif x == "[null,null]":
+        return "[]"
+    elif "null," in x:
+        return x.replace("null,", "")
+    elif ",null" in x:
+        return x.replace(",null", "")
+    else:
+        return x
+
+ 
     if x == "[null]":
         return "[]"
     elif x == "[null,null]":
