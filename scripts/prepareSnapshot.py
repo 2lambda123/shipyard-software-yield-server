@@ -68,7 +68,7 @@ def prepare_snapshot(filename: str) -> None:
     # cast dtypes and round
     df["tvlUsd"] = df["tvlUsd"].astype(int)
     apy_columns = ["apy", "apyBase", "apyReward"]
-    df[apy_columns] = df[apy_columns].round(5)
+    df[apy_columns] = df[apy_columns].round(3)
 
     # 1. hourly (for yield table)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
