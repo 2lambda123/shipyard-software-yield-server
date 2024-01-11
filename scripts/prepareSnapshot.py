@@ -73,8 +73,8 @@ def prepare_snapshot(filename: str) -> None:
     # 1. hourly (for yield table)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df = df.sort_values(["pool", "timestamp"], ascending=True).reset_index(drop=True)
-    f = "hourly_snapshot"
-    df.to_csv(f"daily_snapshot.csv", index=False, float_format='%.5f')
+    f = "last_snapshot"
+    df.to_csv(f"last_snapshot.csv", index=False, float_format='%.5f')
 
     # 2. prepare daily (for stat)
     df_daily = (
