@@ -1,5 +1,6 @@
 import sys
 import ast
+import numpy as np
 
 import pandas as pd
 
@@ -18,9 +19,31 @@ import pandas as pd
 # based on output from Step 2) run the bootstrapUUID.js file which creates a unique uuid for each unique pool and stores that locally
 
 # Step 4) CREATE THE POSTGRES TABLES
-# run the create scripts starting with config, then the others (order doesn't matter for the rest)
-
 def replaceFunc(x: str) -> str:
+    if x == "[null]":
+        return "[]"
+    elif x == "[null,null]":
+        return "[]"
+    elif "null," in x:
+        return x.replace("null,", "")
+    elif ",null" in x:
+        return x.replace(",null", "")
+    else:
+        return x
+
+ 
+    if x == "[null]":
+        return "[]"
+    elif x == "[null,null]":
+        return "[]"
+    elif "null," in x:
+        return x.replace("null,", "")
+    elif ",null" in x:
+        return x.replace(",null", "")
+    else:
+        return x
+
+ 
     if x == "[null]":
         return "[]"
     elif x == "[null,null]":
@@ -47,12 +70,12 @@ def prepare_snapshot(filename: str) -> None:
     ]
 
     # keep positive apy sum values only
-    df = df[(df["apy"] >= 0) & (df["apy"] <= 1e6)]
-    # tvl btw boundary values
-    df = df[(df["tvlUsd"] >= 1000) & (df["tvlUsd"] <= 2e10)]
+    df = df[(df["apy"] >= 0) & (df["apy"] <= 1e6) & (df["tvlUsd"] >= 1000) & (df["tvlUsd"] <= 2e10)]
 
-    # remove pools and project from exclusion list
-    exclude_pools = [
+    # handle potential errors or edge cases
+    if df.empty:
+        raise ValueError('DataFrame is empty. Please check the input data.')
+    include_pools = [
         "0xf4bfe9b4ef01f27920e490cea87fe2642a8da18d",
         "DWmAv5wMun4AHxigbwuJygfmXBBe9WofXAtrMCRJExfb",
         "ripae-seth-weth-42161",
@@ -61,19 +84,19 @@ def prepare_snapshot(filename: str) -> None:
         "0x3c42B0f384D2912661C940d46cfFE1CD10F1c66F-ethereum",
         "0x165ab553871b1a6b3c706e15b6a7bb29a244b2f3",
     ]
-    df = df[~df["pool"].isin(exclude_pools)]
+    df = df[df["pool"].isin(include_pools)]
     df = df[df["project"] != "koyo-finance"]
 
     # cast dtypes and round
     df["tvlUsd"] = df["tvlUsd"].astype(int)
     apy_columns = ["apy", "apyBase", "apyReward"]
-    df[apy_columns] = df[apy_columns].round(5)
+    df[apy_columns] = df[apy_columns].round(3)
 
     # 1. hourly (for yield table)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df = df.sort_values(["pool", "timestamp"], ascending=True).reset_index(drop=True)
-    f = "yield_snapshot"
-    df.to_csv(f"{f}_hourly.csv", index=False)
+    f = "last_snapshot"
+    df.to_csv(f"last_snapshot.csv", index=False, float_format='%.5f')
 
     # 2. prepare daily (for stat)
     df_daily = (
@@ -81,7 +104,7 @@ def prepare_snapshot(filename: str) -> None:
         .last()
         .reset_index()
     )
-    df_daily.to_json(f"{f}_daily.json", orient="records")
+    df_daily.to_json(f"{f}_daily.json", orient="records", double_precision=5)
 
     # 3. prepare last (for config)
     df_last = (
