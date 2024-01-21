@@ -19,9 +19,31 @@ import pandas as pd
 # based on output from Step 2) run the bootstrapUUID.js file which creates a unique uuid for each unique pool and stores that locally
 
 # Step 4) CREATE THE POSTGRES TABLES
-# run the create scripts starting with config, then the others (order doesn't matter for the rest)
-
 def replaceFunc(x: str) -> str:
+    if x == "[null]":
+        return "[]"
+    elif x == "[null,null]":
+        return "[]"
+    elif "null," in x:
+        return x.replace("null,", "")
+    elif ",null" in x:
+        return x.replace(",null", "")
+    else:
+        return x
+
+ 
+    if x == "[null]":
+        return "[]"
+    elif x == "[null,null]":
+        return "[]"
+    elif "null," in x:
+        return x.replace("null,", "")
+    elif ",null" in x:
+        return x.replace(",null", "")
+    else:
+        return x
+
+ 
     if x == "[null]":
         return "[]"
     elif x == "[null,null]":
@@ -53,7 +75,7 @@ def prepare_snapshot(filename: str) -> None:
     # handle potential errors or edge cases
     if df.empty:
         raise ValueError('DataFrame is empty. Please check the input data.')
-    exclude_pools = [
+    include_pools = [
         "0xf4bfe9b4ef01f27920e490cea87fe2642a8da18d",
         "DWmAv5wMun4AHxigbwuJygfmXBBe9WofXAtrMCRJExfb",
         "ripae-seth-weth-42161",
@@ -62,19 +84,19 @@ def prepare_snapshot(filename: str) -> None:
         "0x3c42B0f384D2912661C940d46cfFE1CD10F1c66F-ethereum",
         "0x165ab553871b1a6b3c706e15b6a7bb29a244b2f3",
     ]
-    df = df[~df["pool"].isin(exclude_pools)]
+    df = df[df["pool"].isin(include_pools)]
     df = df[df["project"] != "koyo-finance"]
 
     # cast dtypes and round
     df["tvlUsd"] = df["tvlUsd"].astype(int)
     apy_columns = ["apy", "apyBase", "apyReward"]
-    df[apy_columns] = df[apy_columns].round(5)
+    df[apy_columns] = df[apy_columns].round(3)
 
     # 1. hourly (for yield table)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df = df.sort_values(["pool", "timestamp"], ascending=True).reset_index(drop=True)
-    f = "yield_snapshot"
-    df.to_csv(f"{f}_hourly.csv", index=False, float_format='%.5f')
+    f = "last_snapshot"
+    df.to_csv(f"last_snapshot.csv", index=False, float_format='%.5f')
 
     # 2. prepare daily (for stat)
     df_daily = (
