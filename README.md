@@ -16,9 +16,11 @@ The data must be fetched from on-chain calls or from subgraphs. Centralised api 
 
 ### APY Methodology
 
-- APY values should be calculated over a 24h window and contain only unboosted Rewards.
-- If Incentive Rewards are slashed when exiting a pool early, then set the Reward APY to that lower bound.
-- Omit pre-mined Incentive Rewards
+    apyBase: 0.5, // APY from pool fees/supplying in %
+    apyReward: 0.7, // APY from pool LM rewards in %
+    rewardTokens: ['0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'], // Array of reward token addresses (you can omit this field if a pool doesn't have rewards)
+    underlyingTokens: ['0xdAC17F958D2ee523a2206206994597C13D831ec7'], // Array of underlying token addresses from a pool, eg here USDT address on ethereum
+    poolMeta: "V3 market", // A string value which can stand for any specific details of a pool position, market, fee tier, lock duration, specific strategy etc
 
 ### Adaptors
 
@@ -122,3 +124,24 @@ module.exports = {
 ```
 
 You can find examples for a bunch of other protocols in the [src/adaptors/](src/adaptors/) folder, and if you have any questions feel free to ask them on [our discord](https://discord.defillama.com/).
+  const dataTvl = await utils.getData(
+    'https://api.anchorprotocol.com/api/v1/deposit'
+  );
+
+  const ustPool = {
+    pool: 'terra1hzh9vpxhsk8253se0vv5jj6etdvxu3nv8z07zu',
+    chain: utils.formatChain('terra'),
+    project: 'anchor',
+    symbol: utils.formatSymbol('UST'),
+    tvlUsd: Number(dataTvl.total_ust_deposits) / 1e6,
+    apy: apyData.deposit_apy * 100,
+  };
+
+  return [ustPool]; // Anchor only has a single pool with APY
+};
+
+module.exports = {
+  timetravel: false,
+  apy: poolsFunction,
+  url: 'https://app.anchorprotocol.com/#/earn',
+};
