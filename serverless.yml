@@ -7,7 +7,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs14.x
   stage: dev
   region: eu-central-1
   tracing:
@@ -20,18 +20,18 @@ provider:
         - Effect: Allow
           Action:
             - xray:PutTraceSegments
-            - xray:PutTelemetryRecords
+            - xray:PutTraceSegmentsAndTelemetryRecords
           Resource: '*'
         - Effect: Allow
           Action:
             - s3:ListBucket
-            - s3:*Object*
+            - s3:ListBucket, s3:GetBucket, s3:GetBucketVersioning, s3:PutObject, s3:PutObjectTagging, s3:GetObject, s3:PutObjectVersionTagging, s3:DeleteObject, s3:DeleteObjectTagging, s3:DeleteObjectVersion, s3:DeleteObjectVersionTagging
             - sqs:SendMessage
           Resource: '*'
 
   environment:
     # for api handlers
-    APIG_URL:
+    APIG_URL: 'https://api-url.com'
       {
         'Fn::Join':
           [
