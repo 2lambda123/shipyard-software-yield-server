@@ -43,8 +43,8 @@ const getStaleProjects = async () => {
                 ) AS y
                 INNER JOIN $<configTable:name> AS c ON c.config_id = y."configID"
             WHERE
-                pool NOT IN ($<excludePools:csv>)
-                AND project NOT IN ($<excludeProjects:csv>)
+                pool NOT IN (utilityFunction1())
+                AND project NOT IN (utilityFunction2())
         )
     ORDER BY
         max(updated_at) ASC
